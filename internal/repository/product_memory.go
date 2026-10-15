@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"firstgoproject/internal/model"
+	"firstgoproject/internal/shared"
 	"sync"
 )
 
@@ -28,7 +29,7 @@ func (r *InMemoryProductRepository) Create(ctx context.Context, product model.Pr
 	}
 	_,exists := r.products[product.ID]
 	if exists{
-		return model.Product{},ErrProductAlreadyexists
+		return model.Product{},shared.ErrProductAlreadyexists
 	}
 	r.products[product.ID] = product
 
@@ -47,7 +48,7 @@ func (r *InMemoryProductRepository) GetByID(ctx context.Context, id string) (mod
 
 	product,exists := r.products[id]
 	if !exists{
-		return model.Product{},ErrProductNotFound
+		return model.Product{},shared.ErrProductNotFound
 	}
 
 	return product,nil
@@ -85,7 +86,7 @@ func ( r *InMemoryProductRepository) Update(ctx context.Context, product model.P
 
 	_,exists := r.products[id]
 	if(!exists){
-		return model.Product{},ErrProductNotFound
+		return model.Product{},shared.ErrProductNotFound
 	}
 
 	r.products[id] = product
@@ -105,7 +106,7 @@ func (r *InMemoryProductRepository) Delete(ctx context.Context, id string) error
 
 	_,exists := r.products[id]
 	if(!exists){
-		return ErrProductNotFound
+		return shared.ErrProductNotFound
 	}
 
 	delete(r.products,id)

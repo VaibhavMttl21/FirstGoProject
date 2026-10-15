@@ -4,6 +4,7 @@ import (
 	"context"
 	"firstgoproject/internal/model"
 	"firstgoproject/internal/repository"
+	"firstgoproject/internal/shared"
 	"strings"
 	"time"
 )
@@ -20,23 +21,23 @@ func NewProductService(repo repository.ProductRepository) *ProductService {
 
 func validateProduct(product model.Product) error {
 	if strings.TrimSpace(product.Name) == "" {
-		return ErrProductIsEmpty
+		return shared.ErrProductIsEmpty
 	}
 	if product.PriceCents < 0 {
-		return ErrProductPriceNegative
+		return shared.ErrProductPriceNegative
 	}
 	if product.StockQuantity < 0 {
-		return ErrStockIsNegative
+		return shared.ErrStockIsNegative
 	}
 	currency := product.Currency
 
 	if len(currency) != 3 {
-		return ErrCurrencyInvalid
+		return shared.ErrCurrencyInvalid
 	}
 
 	for _, ch := range currency {
 		if ch < 'A' || ch > 'Z' {
-			return ErrCurrencyInvalid
+			return shared.ErrCurrencyInvalid
 		}
 	}
 	return nil
