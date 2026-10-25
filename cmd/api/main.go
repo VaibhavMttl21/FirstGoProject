@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"firstgoproject/internal/handler"
+	"firstgoproject/internal/middleware"
 	"firstgoproject/internal/repository"
 	"firstgoproject/internal/service"
 	"log"
@@ -22,6 +23,8 @@ func main() {
 	productHandler := handler.NewProductHandler(productService)
 
 	router := mux.NewRouter()
+	
+	router.Use(middleware.LoggingMiddleware)
 
 	router.HandleFunc("/health/live", GetStatus).
 		Methods(http.MethodGet)
