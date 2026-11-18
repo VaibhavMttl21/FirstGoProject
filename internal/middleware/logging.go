@@ -21,7 +21,8 @@ func LoggingMiddleware(next http.Handler) http.Handler{
 	}
 
 	next.ServeHTTP(recorder, r)
-
+//we intercept the method call, add our own behavior, 
+// and then delegate the actual response-writing work to Go's original writer.
 	duration := time.Since(start)
 
 		log.Printf(

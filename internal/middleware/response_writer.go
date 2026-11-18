@@ -1,7 +1,7 @@
 package middleware
 
 import "net/http"
-
+//This is a common Go technique called wrapping an interface or decorating an implementation.
 type statusRecorder struct {
 	http.ResponseWriter
 	statusCode  int
