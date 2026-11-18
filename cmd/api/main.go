@@ -23,9 +23,16 @@ func main() {
 	productHandler := handler.NewProductHandler(productService)
 
 	router := mux.NewRouter()
-	
+
+	router.Use(middleware.RecoveryMiddleware)
+	router.Use(middleware.RequestIDMiddleware)
 	router.Use(middleware.LoggingMiddleware)
 
+	// added for test purposes 
+	// router.HandleFunc("/test/panic", func(w http.ResponseWriter, r *http.Request) {
+	// 	panic("intentional test panic")
+	// }).Methods(http.MethodGet)
+	router.HandleFunc("/test/live",TestPanic)
 	router.HandleFunc("/health/live", GetStatus).
 		Methods(http.MethodGet)
 
@@ -126,6 +133,12 @@ func GetStatus(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(`{"status":"ok"}`))
 }
 
+func TestPanic(w http.ResponseWriter, r *http.Request) {
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("Processing started"))
+
+    panic("something went wrong")
+}
 
 // 1. Why use a goroutine?
 // ListenAndServe() blocks. Running it with go allows main() to wait for shutdown signals at the same time.
