@@ -24,9 +24,15 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.Use(middleware.RecoveryMiddleware)
-	router.Use(middleware.RequestIDMiddleware)
-	router.Use(middleware.LoggingMiddleware)
+	// router.Use(middleware.RecoveryMiddleware)
+	// router.Use(middleware.RequestIDMiddleware)
+	// router.Use(middleware.LoggingMiddleware)
+	handler := middleware.Chain(
+    router,
+    middleware.RequestIDMiddleware,
+    middleware.RecoveryMiddleware,
+    middleware.LoggingMiddleware,
+	)
 
 	// added for test purposes 
 	// router.HandleFunc("/test/panic", func(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +76,7 @@ func main() {
 
 	server := http.Server{
 		Addr:              ":8080",
-		Handler:           router,
+		Handler:           handler, // it starts the wrapped handler that is router
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      30 * time.Second,
