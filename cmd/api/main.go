@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"firstgoproject/internal/database"
 	"firstgoproject/internal/handler"
 	"firstgoproject/internal/middleware"
 	"firstgoproject/internal/repository"
@@ -15,10 +16,29 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	productRepo := repository.NewInMemoryProductRepository()
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using environment variables")
+	}
+
+	db, err := database.ConnectPostgres()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer sqlDB.Close()
+
+	log.Println("Connected to PostgreSQL successfully")
+
+	// productRepo := repository.NewInMemoryProductRepository()
+	productRepo := repository.NewGormProductRepository(db)
 	productService := service.NewProductService(productRepo)
 	productHandler := handler.NewProductHandler(productService)
 
@@ -28,17 +48,17 @@ func main() {
 	// router.Use(middleware.RequestIDMiddleware)
 	// router.Use(middleware.LoggingMiddleware)
 	handler := middleware.Chain(
-    router,
-    middleware.RequestIDMiddleware,
-    middleware.RecoveryMiddleware,
-    middleware.LoggingMiddleware,
+		router,
+		middleware.RequestIDMiddleware,
+		middleware.RecoveryMiddleware,
+		middleware.LoggingMiddleware,
 	)
 
-	// added for test purposes 
+	// added for test purposes
 	// router.HandleFunc("/test/panic", func(w http.ResponseWriter, r *http.Request) {
 	// 	panic("intentional test panic")
 	// }).Methods(http.MethodGet)
-	router.HandleFunc("/test/live",TestPanic)
+	router.HandleFunc("/test/live", TestPanic)
 	router.HandleFunc("/health/live", GetStatus).
 		Methods(http.MethodGet)
 
@@ -140,10 +160,10 @@ func GetStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestPanic(w http.ResponseWriter, r *http.Request) {
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte("Processing started"))
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Processing started"))
 
-    panic("something went wrong")
+	panic("something went wrong")
 }
 
 // 1. Why use a goroutine?

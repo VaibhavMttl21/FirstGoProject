@@ -56,6 +56,7 @@ func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(product) == 0 {
 		writeJSON(w, http.StatusOK, product)
+		return
 	}
 	writeJSON(w, http.StatusOK, product)
 }
